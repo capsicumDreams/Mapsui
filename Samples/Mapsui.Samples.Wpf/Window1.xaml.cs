@@ -21,7 +21,7 @@ namespace Mapsui.Samples.Wpf
             InitializeComponent();
             MapControl.FeatureInfo += MapControlFeatureInfo;
             MapControl.MouseMove += MapControlOnMouseMove;
-            MapControl.RotationLock = false;
+            MapControl.Map.RotationLock = false;
             MapControl.UnSnapRotationDegrees = 30;
             MapControl.ReSnapRotationDegrees = 5;
             MapControl.Renderer.WidgetRenders[typeof(CustomWidget.CustomWidget)] = new CustomWidgetSkiaRenderer();
@@ -56,9 +56,6 @@ namespace Mapsui.Samples.Wpf
 
         private void FillListWithSamples()
         {
-            // todo: find proper way to load assembly
-            WmsSample.MethodToLoadThisAssembly();
-
             var selectedCategory = CategoryComboBox.SelectedValue?.ToString() ?? "";
             SampleList.Children.Clear();
             foreach (var sample in AllSamples.GetSamples().Where(s => s.Category == selectedCategory))
@@ -76,6 +73,10 @@ namespace Mapsui.Samples.Wpf
         
         private void FillComboBoxWithCategories()
         {
+            // todo: find proper way to load assembly
+            WmsSample.LoadAssembly();
+            Tests.Common.Utilities.LoadAssembly();
+
             var categories = AllSamples.GetSamples().Select(s => s.Category).Distinct().OrderBy(c => c);
             foreach (var category in categories)
             {

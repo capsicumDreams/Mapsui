@@ -139,6 +139,16 @@ namespace Mapsui.Widgets.ScaleBar
         public float Scale { get; } = 1;
 
         /// <summary>
+        /// Stroke width for lines
+        /// </summary>
+        public float StrokeWidth { get; set; } = 2;
+
+        /// <summary>
+        /// Stroke width for halo of lines
+        /// </summary>
+        public float StrokeWidthHalo { get; set; } = 4;
+
+        /// <summary>
         /// Length of the ticks
         /// </summary>
         public float TickLength { get; set; } = 3;
@@ -458,8 +468,9 @@ namespace Mapsui.Widgets.ScaleBar
             }
         }
 
-        public override void HandleWidgetTouched(INavigator navigator, Point position)
+        public override bool HandleWidgetTouched(INavigator navigator, Point position)
         {
+            return false;
         }
 
         public bool CanTransform()

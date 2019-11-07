@@ -9,7 +9,7 @@ namespace Mapsui.Samples.Common.Maps
     public class MbTilesSample : ISample
     {
         // This is a hack used for iOS/Android deployment
-        public static string MbTilesLocation { get; set; } = @".\MbTiles\";
+        public static string MbTilesLocation { get; set; } = @"." + Path.DirectorySeparatorChar + "MbTiles";
 
         public string Name => "1 MbTiles";
         public string Category => "Data";

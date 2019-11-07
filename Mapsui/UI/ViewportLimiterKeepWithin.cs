@@ -6,10 +6,10 @@ using Mapsui.Geometries;
 namespace Mapsui.UI
 {
     /// <summary>
-    /// This Viewport limiter will allways keep the map within the zoom and pan limits.
+    /// This Viewport limiter will always keep the map within the zoom and pan limits.
     /// An exception is rotation. 
     /// </summary>
-   public class ViewportLimiterKeepWithin : IViewportLimiter
+    public class ViewportLimiterKeepWithin : IViewportLimiter
     {
         /// <summary>
         /// Set this property in combination KeepCenterWithinExtents or KeepViewportWithinExtents.
@@ -41,15 +41,16 @@ namespace Mapsui.UI
         public double LimitResolution(double resolution, double screenWidth, double screenHeight,  
             IReadOnlyList<double> mapResolutions, BoundingBox mapEnvelope)
         {
-            var resolutionExtremes = ZoomLimits ?? GetExtremes(mapResolutions);
-            if (resolutionExtremes == null) return resolution;
+            var zoomLimits = ZoomLimits ?? GetExtremes(mapResolutions);
+            var panLimit = PanLimits ?? mapEnvelope;
+            if (zoomLimits == null) return resolution;
 
-            if (resolutionExtremes.Min > resolution) return resolutionExtremes.Min;
+            if (zoomLimits.Min > resolution) return zoomLimits.Min;
             
             // This is the ...AndAlwaysFillViewport part
-            var viewportFillingResolution = CalculateResolutionAtWhichMapFillsViewport(screenWidth, screenHeight, mapEnvelope);
-            if (viewportFillingResolution < resolutionExtremes.Min) return resolution; // Mission impossible. Can't adhere to both restrictions
-            var limit = Math.Min(resolutionExtremes.Max, viewportFillingResolution);
+            var viewportFillingResolution = CalculateResolutionAtWhichMapFillsViewport(screenWidth, screenHeight, panLimit);
+            if (viewportFillingResolution < zoomLimits.Min) return resolution; // Mission impossible. Can't adhere to both restrictions
+            var limit = Math.Min(zoomLimits.Max, viewportFillingResolution);
             if (limit < resolution) return limit;
         
             return resolution;
@@ -72,20 +73,30 @@ namespace Mapsui.UI
 
             var x = viewport.Center.X;
 
-            if (MapWidthSpansViewport(maxExtent.Width, viewport.Width, viewport.Resolution)) // if it doesn't fit don't restrict
+            // todo: Figure out if the span check is useful
+            // It is possible to specify a combination of PanLimits and ZoomLimits that are 
+            // impossible to apply. If the lowest allowed resolution does not fill the 
+            // screen it can never be kept within extents. At some point it was useful
+            // to add a check for this. This check is not causing problems in case of small
+            // rounding errors. I am not sure what the original problem was without the check.
+            // I think the map started jumping from side to side when zooming out. Perhaps 
+            // The check should be done when setting the Pan/ZoomLimits. I disabled the check 
+            // for now.
+
+            //if (MapWidthSpansViewport(maxExtent.Width, viewport.Width, viewport.Resolution)) // if it doesn't fit don't restrict
             {
                 if (viewport.Extent.Left < maxExtent.Left)
                     x  += maxExtent.Left - viewport.Extent.Left;
-                if (viewport.Extent.Right > maxExtent.Right)
+                else if (viewport.Extent.Right > maxExtent.Right)
                     x += maxExtent.Right - viewport.Extent.Right;
             }
 
             var y = viewport.Center.Y;
-            if (MapHeightSpansViewport(maxExtent.Height, viewport.Height, viewport.Resolution)) // if it doesn't fit don't restrict
+            //if (MapHeightSpansViewport(maxExtent.Height, viewport.Height, viewport.Resolution)) // if it doesn't fit don't restrict
             {
                 if (viewport.Extent.Top > maxExtent.Top)
                     y += maxExtent.Top - viewport.Extent.Top;
-                if (viewport.Extent.Bottom < maxExtent.Bottom)
+                else if (viewport.Extent.Bottom < maxExtent.Bottom)
                     y += maxExtent.Bottom - viewport.Extent.Bottom;
             }
             viewport.SetCenter(x, y);
