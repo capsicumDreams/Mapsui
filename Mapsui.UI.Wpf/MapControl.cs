@@ -50,7 +50,7 @@ namespace Mapsui.UI.Wpf
         public MapControl()
         {
             Children.Add(WpfCanvas);
-            Children.Add(SkiaCanvas);
+//            Children.Add(SkiaCanvas);
             Children.Add(_selectRectangle);
 
             SkiaCanvas.IgnorePixelScaling = true;
@@ -175,6 +175,19 @@ namespace Mapsui.UI.Wpf
         [Obsolete("Use Navigator.ZoomOut instead", true)]
         public void ZoomOut() {}
 
+        private Duration _zoomDuration = new Duration(new TimeSpan(0, 0, 0, 0, 1000));
+
+        public Duration ZoomDuration
+        {
+            get { return _zoomDuration; }
+            set
+            {
+                _zoomDuration = value;
+                InitAnimation();
+            }
+        }
+
+
         private static void OnResolutionChanged(DependencyObject dependencyObject, DependencyPropertyChangedEventArgs e)
         {
             var newResolution = (double)e.NewValue;
@@ -217,8 +230,11 @@ namespace Mapsui.UI.Wpf
 
         private void InitAnimation()
         {
+            _zoomAnimation.Completed -= ZoomAnimationCompleted;
+            _zoomStoryBoard.Children.Clear();
+
             _zoomAnimation.Completed += ZoomAnimationCompleted;
-            _zoomAnimation.Duration = new Duration(new TimeSpan(0, 0, 0, 0, 1000));
+            _zoomAnimation.Duration = ZoomDuration;
             _zoomAnimation.EasingFunction = new QuarticEase();
             Storyboard.SetTarget(_zoomAnimation, this);
             Storyboard.SetTargetProperty(_zoomAnimation, new PropertyPath("Resolution"));

@@ -166,8 +166,8 @@ namespace Mapsui.Rendering.Xaml
             dest = new Rect(
                 Math.Round(dest.Left),
                 Math.Round(dest.Top),
-                Math.Round(dest.Right) - Math.Round(dest.Left),
-                Math.Round(dest.Bottom) - Math.Round(dest.Top));
+                Math.Round(dest.Right) - Math.Round(dest.Left) + 1 ,
+                Math.Round(dest.Bottom) - Math.Round(dest.Top) + 1);
             return dest;
         }
 
