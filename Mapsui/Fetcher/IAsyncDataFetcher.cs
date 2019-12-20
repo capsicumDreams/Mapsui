@@ -16,6 +16,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 
 using System;
+using System.Diagnostics;
+using System.Text;
 using BruTile;
 
 namespace Mapsui.Fetcher
@@ -36,6 +38,7 @@ namespace Mapsui.Fetcher
 
     public delegate void DataChangedEventHandler(object sender, DataChangedEventArgs e);
 
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public class DataChangedEventArgs : EventArgs
     {
         public DataChangedEventArgs() : this(null, false, null)
@@ -58,6 +61,29 @@ namespace Mapsui.Fetcher
         public Exception Error { get; }
         public bool Cancelled { get; }
         public TileInfo TileInfo { get; } // todo: remove
-        public string LayerName { get; }
+        public String LayerName { get; }
+
+        /// <summary>
+        /// Useful debugging info
+        /// </summary>
+        private String DebuggerDisplay
+        {
+            get
+            {
+                var result = new StringBuilder();
+                if (!String.IsNullOrEmpty(LayerName))
+                {
+                    result.Append(LayerName);
+                }
+                if (Error!= null)
+                {
+                    result.Append($" Exception: {Error.Message}");
+                }
+                result.Append($" {(!Cancelled ? "Not" : "")} Cancelled");
+
+                return result.ToString();
+            }
+        }
+
     }
 }

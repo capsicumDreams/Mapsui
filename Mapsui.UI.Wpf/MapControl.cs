@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -77,7 +76,7 @@ namespace Mapsui.UI.Wpf
 
             IsManipulationEnabled = true;
 
-            RenderMode = RenderMode.Skia;
+            RenderMode = RenderMode.Wpf;
         }
 
         protected override void OnRender(DrawingContext dc)
