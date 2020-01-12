@@ -11,7 +11,13 @@ namespace Mapsui.Layers
 {
     public  class WritableLayer : BaseLayer
     {
+        private Boolean _modified = true;
+        private BoundingBox _extentBoundingBox;
+
         private readonly ConcurrentHashSet<IFeature> _cache = new ConcurrentHashSet<IFeature>();
+
+        protected override String DebuggerDisplay => $"{Name}: {GetFeatures().Count()}";
+
 
         public override IEnumerable<IFeature> GetFeaturesInView(BoundingBox box, double resolution)
         {
@@ -42,13 +48,27 @@ namespace Mapsui.Layers
             return new BoundingBox(minX, minY, maxX, maxY);
         }
 
-        public override BoundingBox Envelope => GetExtents();
+        public override BoundingBox Envelope
+        {
+            get
+            {
+                if (_modified)
+                {
+                    _extentBoundingBox = GetExtents();
+                    _modified = false;
+                }
+                return _extentBoundingBox;
+            }
+        }
+
 
         public override void RefreshData(BoundingBox extent, double resolution, bool majorChange)
         {
             //The MemoryLayer always has it's data ready so can fire a DataChanged event immediately so that listeners can act on it.
             OnDataChanged(new DataChangedEventArgs());
         }
+
+
         public IEnumerable<IFeature> GetFeatures()
         {
             return _cache;

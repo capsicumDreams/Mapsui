@@ -39,7 +39,7 @@ namespace Mapsui
     public class Map : INotifyPropertyChanged, IMap
     {
         private LayerCollection _layers = new LayerCollection();
-        private Color _backColor = Color.White;
+        private Color _backColor = Color.FromArgb(255, 11, 16, 16);
         private IViewportLimiter _limiter = new ViewportLimiter();
 
         /// <summary>
@@ -47,7 +47,6 @@ namespace Mapsui
         /// </summary>
         public Map()
         {
-            BackColor = Color.White;
             Layers = new LayerCollection();
         }
 
@@ -232,6 +231,8 @@ namespace Mapsui
             OnPropertyChanged(nameof(Layers));
         }
 
+
+
         private void LayersLayerRemoved(ILayer layer)
         {
             if (layer is IAsyncDataFetcher asyncLayer)
@@ -246,6 +247,7 @@ namespace Mapsui
 
             OnPropertyChanged(nameof(Layers));
         }
+
 
         private static IReadOnlyList<double> DetermineResolutions(IEnumerable<ILayer> layers)
         {

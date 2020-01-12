@@ -6,7 +6,10 @@ namespace Mapsui.Styles
     public class BitmapRegistry
     {
         private static BitmapRegistry _instance;
+        
         private readonly IDictionary<int, object> _register = new Dictionary<int, object>();
+
+
         private BitmapRegistry() {}
         private int _counter;
 
@@ -30,6 +33,8 @@ namespace Mapsui.Styles
             _register[id] = bitmapData;
             return id;
         }
+
+
 
         public void Unregister(int id)
         {

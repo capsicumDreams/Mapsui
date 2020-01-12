@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using Mapsui.Fetcher;
 using Mapsui.Geometries;
@@ -10,8 +12,26 @@ using Mapsui.Widgets;
 
 namespace Mapsui.Layers
 {
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public abstract class BaseLayer : ILayer
-    {
+    {        
+        /// <summary>
+        /// Called whenever a property changed
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// DataChanged should be triggered by any data changes
+        /// </summary>
+        public event DataChangedEventHandler DataChanged;
+
+        /// <summary>
+        /// Data has changed, we don't need to get new data, just refresh graphics
+        /// </summary>
+        public event DataChangedEventHandler DataVisualRefreshNeeded;
+
+        
+
         private static int _instanceCounter;
         private bool _busy;
         private string _crs;
@@ -25,6 +45,13 @@ namespace Mapsui.Layers
         private object _tag;
         private ITransformation _transformation;
         private BoundingBox _envelope;
+
+
+        /// <summary>
+        /// Useful debugging info
+        /// </summary>
+        protected virtual String DebuggerDisplay => $"{Name}";
+
 
         public Transformer Transformer { get; } = new Transformer();
 
@@ -64,15 +91,7 @@ namespace Mapsui.Layers
             Name = name;
         }
 
-        /// <summary>
-        /// Called whenever a property changed
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
 
-        /// <summary>
-        /// DataChanged should be triggered by any data changes
-        /// </summary>
-        public event DataChangedEventHandler DataChanged;
 
         /// <inheritdoc />
         public int Id { get; }
@@ -232,9 +251,9 @@ namespace Mapsui.Layers
 
         public abstract void RefreshData(BoundingBox extent, double resolution, bool majorChange);
 
-        public void DataHasChanged()
+        public void DataNeedsVisualRefresh()
         {
-            DataChanged?.Invoke(this, new DataChangedEventArgs());
+            DataVisualRefreshNeeded?.Invoke(this, new DataChangedEventArgs());
         }
 
         /// <inheritdoc />
@@ -256,6 +275,11 @@ namespace Mapsui.Layers
         protected void OnDataChanged(DataChangedEventArgs args)
         {
             DataChanged?.Invoke(this, args);
+        }
+
+        public void DataHasChanged()
+        {
+            throw new NotImplementedException();
         }
     }
 }

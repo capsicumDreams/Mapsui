@@ -11,6 +11,7 @@ namespace Mapsui.Providers
     {
         private readonly Dictionary<string, object> _dictionary = new Dictionary<string, object>();
         private bool _disposed;
+        private IGeometry _geometry;
 
         public Feature()
         {
@@ -30,7 +31,15 @@ namespace Mapsui.Providers
             }
         }
 
-        public IGeometry Geometry { get; set; }
+        public IGeometry Geometry
+        {
+            get { return _geometry; }
+            set
+            {
+                _geometry = value;
+                RenderedGeometry.Clear();
+            }
+        }
 
         public IDictionary<IStyle, object> RenderedGeometry { get; private set; }
 

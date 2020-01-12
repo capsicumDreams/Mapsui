@@ -12,6 +12,7 @@ using Mapsui.UI;
 using Mapsui.Samples.Common;
 using Mapsui.Samples.Common.Desktop;
 using System.Diagnostics;
+using System.Windows.Media;
 
 namespace Mapsui.Samples.Wpf
 {
