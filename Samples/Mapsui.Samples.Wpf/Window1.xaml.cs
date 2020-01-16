@@ -157,7 +157,7 @@ namespace Mapsui.Samples.Wpf
 
         private void MapControlOnInfo(object sender, MapInfoEventArgs args)
         {
-            if (args.MapInfo.Feature != null)
+            if (args?.MapInfo?.Feature != null)
                 FeatureInfo.Text = $"Click Info:{Environment.NewLine}{args.MapInfo.Feature.ToDisplayText()}";
         }
     }
