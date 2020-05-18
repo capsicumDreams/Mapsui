@@ -52,7 +52,6 @@ namespace Mapsui.UI.Wpf
 //            Children.Add(SkiaCanvas);
             Children.Add(_selectRectangle);
 
-            SkiaCanvas.IgnorePixelScaling = true;
             SkiaCanvas.PaintSurface += SKElementOnPaintSurface;
 
             Map = new Map();
@@ -208,24 +207,7 @@ namespace Mapsui.UI.Wpf
             Focusable = true;
         }
         
-        public float PixelDensity => DeterminePixelDensity();
 
-        private float DeterminePixelDensity()
-        {
-            var presentationSource = PresentationSource.FromVisual(this);
-            if (presentationSource == null) throw new Exception("PresentationSource is null");
-            var compositionTarget = presentationSource.CompositionTarget;
-            if (compositionTarget == null) throw new Exception("CompositionTarget is null");
-
-            var matrix = compositionTarget.TransformToDevice;
-
-            var dpiX = matrix.M11;
-            var dpiY = matrix.M22;
-
-            if (dpiX != dpiY) throw new ArgumentException();
-
-            return (float)dpiX;
-        }
 
         private void InitAnimation()
         {
@@ -259,6 +241,8 @@ namespace Mapsui.UI.Wpf
             {
                 _toResolution = ZoomHelper.ZoomOut(_map.Resolutions, _toResolution);
             }
+
+            _toResolution = Map.Limiter.LimitResolution(_toResolution, Viewport.Width, Viewport.Height, Map.Resolutions, Map.Envelope);
 
             // Some cheating to trigger a zoom animation if resolution does not change.
             // This workaround could be ommitted if the zoom animations was on CenterX, CenterY and Resolution, not Resolution alone.
@@ -318,7 +302,8 @@ namespace Mapsui.UI.Wpf
                 if (IsClick(_currentMousePosition, _downMousePosition))
                 {
                     HandleFeatureInfo(e);
-                    OnInfo(InvokeInfo(touchPosition, _downMousePosition, e.ClickCount));
+                    var mapInfoEventArgs = InvokeInfo(touchPosition, _downMousePosition, e.ClickCount);
+                    OnInfo(mapInfoEventArgs);
                 }
             }
         }
@@ -540,8 +525,11 @@ namespace Mapsui.UI.Wpf
         {
             if (Renderer == null) return;
             if (_map == null) return;
+            if (PixelDensity <= 0) return;
 
-            Renderer.Render(args.Surface.Canvas, Viewport, Map.Layers, Map.Widgets, Map.BackColor);
+            args.Surface.Canvas.Scale(PixelDensity, PixelDensity);
+
+            Renderer.Render(args.Surface.Canvas, new Viewport(Viewport), Map.Layers, Map.Widgets, Map.BackColor);
         }
         
         private void PaintWpf()
@@ -550,6 +538,23 @@ namespace Mapsui.UI.Wpf
             if (_map == null) return;
 
             Renderer.Render(WpfCanvas, Viewport, _map.Layers, Map.Widgets, _map.BackColor);
+        }
+
+        private float GetPixelDensity()
+        {
+            var presentationSource = PresentationSource.FromVisual(this);
+            if (presentationSource == null) throw new Exception("PresentationSource is null");
+            var compositionTarget = presentationSource.CompositionTarget;
+            if (compositionTarget == null) throw new Exception("CompositionTarget is null");
+
+            var matrix = compositionTarget.TransformToDevice;
+
+            var dpiX = matrix.M11;
+            var dpiY = matrix.M22;
+
+            if (dpiX != dpiY) throw new ArgumentException();
+
+            return (float)dpiX;
         }
     }
 }

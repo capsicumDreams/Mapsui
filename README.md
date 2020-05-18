@@ -5,11 +5,16 @@
 | Mapsui NuGet   | [![NuGet Status](https://img.shields.io/nuget/v/Mapsui.svg?style=flat)](https://www.nuget.org/packages/Mapsui/) |
 | Mapsui.Forms Nuget   | [![NuGet Status](https://img.shields.io/nuget/v/Mapsui.Forms.svg?style=flat)](https://www.nuget.org/packages/Mapsui.Forms/) |
 | Build on Windows    | [![Build status](https://ci.appveyor.com/api/projects/status/p20w43qv4ixkkftp?svg=true)](https://ci.appveyor.com/project/pauldendulk/mapsui) |
-| Build on Mac | [![Build Status](https://app.bitrise.io/app/119dabd1302841a1.svg?token=KH9mbi7R6uLBz0iUZjbvJw)](https://www.bitrise.io/app/119dabd1302841a1) |
 | Build docs | [![Build status](https://ci.appveyor.com/api/projects/status/c8hcfeoafmf51gin/branch/master?svg=true)](https://ci.appveyor.com/project/pauldendulk/mapsui-373p1/branch/master) |
 
 ## News
-- 2020 februari 2: We have gitter channel https://gitter.im/Mapsui/Lobby
+
+- 2020 May 4: Released Mapsui 2.0.0!
+  - The main developers on v2 are Dirk Weltz (@charlenni) and Paul den Dulk (@pauldendulk).
+  - Thanks go to all contributors:  https://github.com/Mapsui/Mapsui/graphs/contributors
+  - Many users entered valuable bug reports as well, thanks.
+- 2020 March 10: Follow Mapsui on Twitter https://twitter.com/mapsui
+- 2020 Februari 2: We have a gitter channel https://gitter.im/Mapsui/Lobby
 
 ## Mapsui (pronounced map-su-wii)
 
@@ -34,8 +39,16 @@ The best way to get going with Mapsui is by using the Samples. If you clone the 
 ## Questions
 If you have a question please submit an issue [here](https://github.com/mapsui/Mapsui/issues)
 
+## How can I help as a user
+- Write clear issues. Mention the Mapsui version and which platform you use. 
+- Use screenshots and capture gif animations for issues that are hard to explain.
+- Create minimal reproducible samples if possible. This speeds up fixing the issue a lot.
+- Make yourself heard. We need to know what you are struggling with. Sure, you need to be respectful but don't be too modest.
+- You can vote on [feature-request issues](https://github.com/Mapsui/Mapsui/issues?q=is%3Aopen+label%3Afeature-request+sort%3Areactions-%2B1-desc) by adding a thumbs up on the first post of the issue. 
+- Close an issue if your question is answered.
+
 ## Contributing
-See the [guidelines](CONTRIBUTING.md)
+See the [guidelines](http://mapsui.com/documentation/Contributors-Guidelines.html)
 
 ## Thanks go to
 - ReSharper for providing free open source licenses for Mapsui
@@ -51,7 +64,7 @@ See the [guidelines](CONTRIBUTING.md)
 
 ## Sponsors
 
-We are delightly with our first gold sponsor Sebastian Kruse, who has also contributed to Mapsui with informed test reports and expert advice.
+We are delighted with our first gold sponsor Sebastian Kruse, who has also contributed to Mapsui with informed test reports and expert advice.
 
 [Sebastian Kruse](https://github.com/Sebastian1989101)
 

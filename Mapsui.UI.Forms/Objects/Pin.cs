@@ -3,8 +3,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Mapsui.Providers;
+using Mapsui.Rendering.Skia;
 using Mapsui.Styles;
-using Mapsui.UI.Forms.Extensions;
 using Mapsui.UI.Objects;
 using SkiaSharp;
 using SkiaSharp.Views.Forms;
@@ -16,7 +16,7 @@ namespace Mapsui.UI.Forms
     {
         private int _bitmapId = -1;
         private byte[] _bitmapData;
-        private readonly MapView _mapView;
+        private MapView _mapView;
 
         public static readonly BindableProperty TypeProperty = BindableProperty.Create(nameof(Type), typeof(PinType), typeof(Pin), default(PinType));
         public static readonly BindableProperty ColorProperty = BindableProperty.Create(nameof(Color), typeof(Xamarin.Forms.Color), typeof(Pin), SKColors.Red.ToFormsColor());
@@ -33,8 +33,6 @@ namespace Mapsui.UI.Forms
         public static readonly BindableProperty WidthProperty = BindableProperty.Create(nameof(Width), typeof(double), typeof(Pin), -1.0, BindingMode.OneWayToSource);
         public static readonly BindableProperty HeightProperty = BindableProperty.Create(nameof(Height), typeof(double), typeof(Pin), -1.0);
         public static readonly BindableProperty AnchorProperty = BindableProperty.Create(nameof(Anchor), typeof(Point), typeof(Pin), new Point(0, 28));
-        public static readonly BindableProperty CalloutAnchorProperty = BindableProperty.Create(nameof(CalloutAnchor), typeof(Point), typeof(Pin), new Point(0.5, 1.0));
-        public static readonly BindableProperty IsCalloutVisibleProperty = BindableProperty.Create(nameof(IsCalloutVisible), typeof(bool), typeof(Pin), default(bool));
         public static readonly BindableProperty TransparencyProperty = BindableProperty.Create(nameof(Transparency), typeof(float), typeof(Pin), 0f);
 
         /// <summary>
@@ -46,6 +44,40 @@ namespace Mapsui.UI.Forms
             _mapView = mapView;
 
             CreateFeature();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:Mapsui.UI.Forms.Pin"/> class
+        /// </summary>
+        /// <param name="mapView">MapView to which this pin belongs</param>
+        public Pin()
+        {
+        }
+
+        /// <summary>
+        /// Internal MapView for refreshing of screen
+        /// </summary>
+        internal MapView MapView
+        { 
+            get 
+            { 
+                return _mapView; 
+            } 
+            set
+            {
+                if (_mapView != value)
+                {
+                    if (_callout != null)
+                    {
+                        _mapView?.RemoveCallout(_callout);
+                    }
+                    
+                    Feature = null;
+                    _mapView = value;
+
+                    CreateFeature();
+                }
+            }
         }
 
         /// <summary>
@@ -184,24 +216,6 @@ namespace Mapsui.UI.Forms
         }
 
         /// <summary>
-        /// Anchor of Callout in pixel
-        /// </summary>
-        public Point CalloutAnchor
-        {
-            get { return (Point)GetValue(CalloutAnchorProperty); }
-            set { SetValue(CalloutAnchorProperty, value); }
-        }
-
-        /// <summary>
-        /// Determins, if Callout is visible
-        /// </summary>
-        public bool IsCalloutVisible
-        {
-            get { return (bool)GetValue(IsCalloutVisibleProperty); }
-            set { SetValue(IsCalloutVisibleProperty, value); }
-        }
-
-        /// <summary>
         /// Transparency of pin
         /// </summary>
         public float Transparency
@@ -215,19 +229,11 @@ namespace Mapsui.UI.Forms
         /// </summary>
         public object Tag { get; set; }
 
-        private Feature _feature;
-
         /// <summary>
         /// Mapsui feature for this pin
         /// </summary>
         /// <value>Mapsui feature</value>
-        public Feature Feature
-        {
-            get
-            {
-                return _feature;
-            }
-        }
+        public Feature Feature { get; private set; }
 
         private Callout _callout;
 
@@ -242,8 +248,8 @@ namespace Mapsui.UI.Forms
                 // Show a new Callout
                 if (_callout == null)
                 {
-                    // Create a default pin
-                    _callout = _mapView.CreateCallout(Position);
+                    // Create a default callout
+                    _callout = new Callout(this);
                     if (string.IsNullOrWhiteSpace(Address))
                     {
                         _callout.Type = CalloutType.Single;
@@ -256,8 +262,7 @@ namespace Mapsui.UI.Forms
                         _callout.Subtitle = Address;
                     }
                 }
-                UpdateCalloutPosition();
-
+                
                 return _callout;
             }
             internal set
@@ -265,6 +270,32 @@ namespace Mapsui.UI.Forms
                 if (value != null && _callout != value)
                     _callout = value;
             }
+        }
+
+        /// <summary>
+        /// Show corresponding callout
+        /// </summary>
+        public void ShowCallout()
+        {
+            _callout.Update();
+            _mapView.AddCallout(_callout);
+        }
+
+        /// <summary>
+        /// Hide corresponding callout
+        /// </summary>
+        public void HideCallout()
+        {
+            _mapView.RemoveCallout(_callout);
+        }
+
+        /// <summary>
+        /// Check visibility for corresponding callout
+        /// </summary>
+        /// <returns>True, if callout is visible on map</returns>
+        public bool IsCalloutVisible()
+        {
+            return _mapView != null ? _mapView.IsCalloutVisible(_callout) : false;
         }
 
         /// <summary>
@@ -318,45 +349,44 @@ namespace Mapsui.UI.Forms
             switch (propertyName)
             {
                 case nameof(Position):
-                    _feature.Geometry = Position.ToMapsui();
-                    if (_callout != null)
-                        UpdateCalloutPosition();
+                    if (Feature != null)
+                    {
+                        Feature.Geometry = Position.ToMapsui();
+                        _callout.Feature.Geometry = Feature.Geometry;
+                    }
                     break;
                 case nameof(Label):
-                    _feature["Label"] = Label;
-                    if (_callout != null)
-                        _callout.Title = Label;
+                    if (Feature != null)
+                        Feature["Label"] = Label;
+                    Callout.Title = Label;
                     break;
                 case nameof(Address):
-                    if (_callout != null)
-                        _callout.Subtitle = Address;
+                    Callout.Subtitle = Address;
                     break;
                 case nameof(Transparency):
-                    ((SymbolStyle)_feature.Styles.First()).Opacity = 1 - Transparency;
+                    ((SymbolStyle)Feature.Styles.First()).Opacity = 1 - Transparency;
                     break;
                 case nameof(Anchor):
-                    ((SymbolStyle)_feature.Styles.First()).SymbolOffset = new Offset(Anchor.X, Anchor.Y);
-                    break;
-                case nameof(CalloutAnchor):
-                    if (_callout != null)
-                        UpdateCalloutPosition();
+                    ((SymbolStyle)Feature.Styles.First()).SymbolOffset = new Offset(Anchor.X, Anchor.Y);
                     break;
                 case nameof(Rotation):
-                    ((SymbolStyle)_feature.Styles.First()).SymbolRotation = Rotation;
+                    ((SymbolStyle)Feature.Styles.First()).SymbolRotation = Rotation;
                     break;
                 case nameof(IsVisible):
-                    ((SymbolStyle)_feature.Styles.First()).Enabled = IsVisible;
+                    if (!IsVisible)
+                        HideCallout();
+                    ((SymbolStyle)Feature.Styles.First()).Enabled = IsVisible;
                     break;
                 case nameof(MinVisible):
                     // TODO: Update callout MinVisble too
-                    ((SymbolStyle)_feature.Styles.First()).MinVisible = MinVisible;
+                    ((SymbolStyle)Feature.Styles.First()).MinVisible = MinVisible;
                     break;
                 case nameof(MaxVisible):
                     // TODO: Update callout MaxVisble too
-                    ((SymbolStyle)_feature.Styles.First()).MaxVisible = MaxVisible;
+                    ((SymbolStyle)Feature.Styles.First()).MaxVisible = MaxVisible;
                     break;
                 case nameof(Scale):
-                    ((SymbolStyle)_feature.Styles.First()).SymbolScale = Scale;
+                    ((SymbolStyle)Feature.Styles.First()).SymbolScale = Scale;
                     break;
                 case nameof(Type):
                 case nameof(Color):
@@ -370,18 +400,6 @@ namespace Mapsui.UI.Forms
                     if (Type == PinType.Svg)
                         CreateFeature();
                     break;
-                case nameof(IsCalloutVisible):
-                    if (IsCalloutVisible)
-                    {
-                        _mapView.ShowCallout(Callout);
-                    }
-                    else
-                    {
-                        // Hide Callout of pin, but don't destroy it. 
-                        // Destroy it later, when pin is removed from pins list.
-                        _mapView.HideCallout(Callout);
-                    }
-                    break;
             }
         }
 
@@ -391,14 +409,16 @@ namespace Mapsui.UI.Forms
         {
             lock (_sync)
             {
-                if (_feature == null)
+                if (Feature == null)
                 {
                     // Create a new one
-                    _feature = new Feature
+                    Feature = new Feature
                     {
                         Geometry = Position.ToMapsui(),
                         ["Label"] = Label,
                     };
+                    if (_callout != null)
+                        _callout.Feature.Geometry = Position.ToMapsui();
                 }
                 // Check for bitmapId
                 if (_bitmapId != -1)
@@ -437,7 +457,7 @@ namespace Mapsui.UI.Forms
                         var bitmap = new SKBitmap(info);
                         var canvas = new SKCanvas(bitmap);
                         // Now draw Svg image to bitmap
-                        using (var paint = new SKPaint())
+                        using (var paint = new SKPaint() { IsAntialias = true })
                         {
                             // Replace color while drawing
                             paint.ColorFilter = SKColorFilter.CreateBlendMode(Color.ToSKColor(), SKBlendMode.SrcIn); // use the source color
@@ -469,8 +489,8 @@ namespace Mapsui.UI.Forms
                 if (_bitmapId != -1)
                 {
                     // We only want to have one style
-                    _feature.Styles.Clear();
-                    _feature.Styles.Add(new SymbolStyle
+                    Feature.Styles.Clear();
+                    Feature.Styles.Add(new SymbolStyle
                     {
                         BitmapId = _bitmapId,
                         SymbolScale = Scale,
@@ -481,18 +501,6 @@ namespace Mapsui.UI.Forms
                     });
                 }
             }
-        }
-
-        /// <summary>
-        /// Set new position for Callout, if there is one
-        /// </summary>
-        internal void UpdateCalloutPosition()
-        {
-            if (_callout == null)
-                return;
-
-            var screen = _mapView._mapControl.Viewport.WorldToScreen(Position.ToMapsui());
-            _callout.Anchor = _mapView._mapControl.Viewport.ScreenToWorld(new Geometries.Point(screen.X - CalloutAnchor.X, screen.Y - CalloutAnchor.Y)).ToForms();
         }
     }
 }

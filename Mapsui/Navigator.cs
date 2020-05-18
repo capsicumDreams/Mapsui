@@ -109,38 +109,22 @@ namespace Mapsui
         {
             var resolution = ZoomHelper.ZoomIn(_map.Resolutions, _viewport.Resolution);
             ZoomTo(resolution, centerOfZoom);
-
-            Navigated?.Invoke(this, EventArgs.Empty);
         }
 
         public void ZoomOut(Point centerOfZoom)
         {
             var resolution = ZoomHelper.ZoomOut(_map.Resolutions, _viewport.Resolution);
             ZoomTo(resolution, centerOfZoom);
-
-            Navigated?.Invoke(this, EventArgs.Empty);
         }
 
         public void NavigateToFullEnvelope(ScaleMethod scaleMethod = ScaleMethod.Fill)
         {
             NavigateTo(_map.Envelope, scaleMethod);
-
-            Navigated?.Invoke(this, EventArgs.Empty);
         }
 
         public void ZoomTo(double resolution, Point centerOfZoom)
         {
-            // 1) Temporarily center on the center of zoom
-            _viewport.SetCenter(_viewport.ScreenToWorld(centerOfZoom));
-
-            // 2) Then zoom 
-            _viewport.SetResolution(resolution);
-
-            // 3) Then move the temporary center of the map back to the mouse position
-            _viewport.SetCenter(_viewport.ScreenToWorld(
-                _viewport.Width - centerOfZoom.X,
-                _viewport.Height - centerOfZoom.Y));
-
+            _viewport.SetResolution(resolution, centerOfZoom);
             Navigated?.Invoke(this, EventArgs.Empty);
         }
     }

@@ -11,8 +11,7 @@ using Mapsui.Samples.Wpf.Utilities;
 using Mapsui.UI;
 using Mapsui.Samples.Common;
 using Mapsui.Samples.Common.Desktop;
-using System.Diagnostics;
-using System.Windows.Media;
+using SQLitePCL;
 
 namespace Mapsui.Samples.Wpf
 {
@@ -28,8 +27,6 @@ namespace Mapsui.Samples.Wpf
             MapControl.ReSnapRotationDegrees = 5;
             MapControl.Renderer.WidgetRenders[typeof(CustomWidget.CustomWidget)] = new CustomWidgetSkiaRenderer();
 
-            MapControl.ZoomDuration = new Duration(TimeSpan.Zero);
-            MapControl.Viewport.ViewportChanged += OnMapViewportChanged;
             Logger.LogDelegate += LogMethod;
 
             CategoryComboBox.SelectionChanged += CategoryComboBoxSelectionChanged;
@@ -38,23 +35,17 @@ namespace Mapsui.Samples.Wpf
             FillComboBoxWithCategories();
             FillListWithSamples();
         }
-
-        private void OnMapViewportChanged(Object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(Viewport.SetResolution):
-                    Debug.WriteLine($"{MapControl.Viewport.Resolution:F2}");
-                    break;
-            }
-        }
-
+        
         private void RenderModeOnSelectionChanged(object sender, SelectionChangedEventArgs selectionChangedEventArgs)
         {
             var selectedValue = ((ComboBoxItem)((ComboBox)sender).SelectedItem).Content.ToString();
 
             if (selectedValue.ToLower().Contains("wpf"))
+            {
                 MapControl.RenderMode = UI.Wpf.RenderMode.Wpf;
+                if (!((Rendering.Xaml.MapRenderer)MapControl.Renderer).StyleRenderers.ContainsKey(typeof(Common.Maps.CustomStyle)))
+                    ((Rendering.Xaml.MapRenderer)MapControl.Renderer).StyleRenderers.Add(typeof(Common.Maps.CustomStyle), new XamlCustomStyleRenderer());
+            }
             else if (selectedValue.ToLower().Contains("skia"))
                 MapControl.RenderMode = UI.Wpf.RenderMode.Skia;
             else
@@ -157,8 +148,16 @@ namespace Mapsui.Samples.Wpf
 
         private void MapControlOnInfo(object sender, MapInfoEventArgs args)
         {
-            if (args?.MapInfo?.Feature != null)
+            if (args.MapInfo?.Feature != null)
+            {
+                FeatureInfoBorder.Visibility = Visibility.Visible;
                 FeatureInfo.Text = $"Click Info:{Environment.NewLine}{args.MapInfo.Feature.ToDisplayText()}";
+            }
+            else
+            {
+                FeatureInfoBorder.Visibility = Visibility.Collapsed;
+            }
+
         }
     }
 }
