@@ -53,3 +53,7 @@ project.lock.json
 /Samples/Mapsui.Samples.Uwp/AppPackages/Mapsui.Samples.Uwp_1.0.0.0_x86_Test
 /Artifacts
 *.appx
+Mapsui.Rendering.Xaml/packages_BACKUP_18548.config
+Mapsui.Rendering.Xaml/packages_BASE_18548.config
+Mapsui.Rendering.Xaml/packages_LOCAL_18548.config
+Mapsui.Rendering.Xaml/packages_REMOTE_18548.config

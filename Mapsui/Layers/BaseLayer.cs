@@ -249,7 +249,7 @@ namespace Mapsui.Layers
 
         /// <inheritdoc />
 
-        public abstract void RefreshData(BoundingBox extent, double resolution, bool majorChange);
+        public abstract void RefreshData(BoundingBox extent, double resolution, ChangeType changeType);
 
         public void DataNeedsVisualRefresh()
         {
