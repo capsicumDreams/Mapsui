@@ -9,6 +9,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="E:\Repos\missionmap\LogimapLibraries\shared\tiles\MapControl.cs" Link="MapControl.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Properties\" />
@@ -23,8 +26,8 @@
     <PackageReference Include="BruTile" Version="3.0.0" />
     <PackageReference Include="SkiaSharp" Version="2.80.0" />
     <PackageReference Include="SkiaSharp.Views" Version="2.80.0" />
-    <PackageReference Include="SkiaSharp" Version="2.80.1" />
-    <PackageReference Include="SkiaSharp.Views" Version="2.80.1" />
+    <PackageReference Include="SkiaSharp" Version="2.80.2" />
+    <PackageReference Include="SkiaSharp.Views" Version="2.80.2" />
   </ItemGroup>
 
   <ItemGroup>
