@@ -9,9 +9,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="E:\Repos\missionmap\LogimapLibraries\shared\tiles\MapControl.cs" Link="MapControl.cs" />
-  </ItemGroup>
+
 
   <ItemGroup>
     <Folder Include="Properties\" />
